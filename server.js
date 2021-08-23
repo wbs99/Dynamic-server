@@ -39,15 +39,19 @@ var server = http.createServer(function (request, response) {
         (user) => user.name === obj.name && user.password === obj.password
       );
       if (user === undefined) {
-        //没找到
+        // user 如果是 undefined，那么就是数据库中没有匹配的用户名和密码
         response.statusCode = 400;
         response.setHeader("Content-Type", "text/json; charset=utf-8");
       } else {
-        //找到了
+        //数据库中有匹配的用户名和密码;
         response.statusCode = 200;
         const random = Math.random();
+        const session = JSON.parse(
+          //读取 session.json 中的内容
+          fs.readFileSync("./session.json").toString()
+        );
         session[random] = { user_id: user.id };
-        fs.writeFileSync("./session.json", JSON.stringify(session));
+        fs.writeFileSync("./session.json", JSON.stringify(session)); //把 session 的内容写到 session.json 中
         response.setHeader("Set-Cookie", `session_id=${random}; HttpOnly`);
       }
       response.end();
@@ -57,13 +61,14 @@ var server = http.createServer(function (request, response) {
     const cookie = request.headers["cookie"]; //获取请求头里的Cookie
     let sessionId;
     try {
-      //从cookie里提取出登录用户Id，命名为userId
+      //从cookie里提取出登录用户Id，命名为sessionId，其实也就是登录时候设置的 随机数
       sessionId = cookie
         .split(";")
         .filter((s) => s.indexOf("session_id=") >= 0)[0]
         .split("=")[1];
     } catch (error) {}
     if (sessionId && session[sessionId]) {
+      //session[sessionId] 就是 session.json 中随机数对应的 user_id 对象
       const userId = session[sessionId].user_id;
       const userArray = JSON.parse(fs.readFileSync("./db/users.json"));
       const user = userArray.find((user) => user.id === userId); //找出数据库中，他的id和登录用户id一样的用户，叫做user
