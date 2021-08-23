@@ -24,21 +24,23 @@
     <script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
     <script>
       //  监听from表单元素的点击click事件，当click事件被触发时执行函数
-      // 找到input的name为name的元素，取该元素的用户输入的值，命名为name；同理找到input的name为password的元素，取该元素的用户输入的值，命名为password
-      // 直接用jQuery发Ajax请求：POST请求，请求的url是/register，传给服务器的数据也就是请求体内容为刚刚获取的用户数据的json字符串，请求体的类型也就是传给服务器的数据类型为json；再用.then设置请求成功和失败后的函数
+      // 找到 name='name'的 input，得到 input.value，即用户输入的账号
+      // 找到 name='password'的 input，得到 input.value，即用户输入的密码
+      // 直接用jQuery发Ajax请求：POST请求，请求的url是/register，
+      // 传给服务器的数据是刚刚获取的用户数据的json字符串，请求体的类型也就是传给服务器的数据类型为json；再用.then设置请求成功和失败后的函数
 
       const $form = $("#registerForm");
       $form.on("submit", (e) => {
         e.preventDefault(); //阻止 form 表单默认事件
-        const name = $form.find("input[name=name]").val(); //找到相应的 name 和 password 的值
-        const password = $form.find("input[name=password]").val();
-        console.log(name, password);
+        const name = $form.find("input[name=name]").val(); //得到用户输入的用户名
+        const password = $form.find("input[name=password]").val(); //得到用户输入的密码
+        console.log(name, password); //log 出的就是输入的 name 和 password
         $.ajax({
           // ajax 发送 POST 请求
           method: "POST",
           url: "/register",
           contentType: "text/json; charset=UTF-8", //让服务器知道我们上传的是 JSON 字符串
-          data: JSON.stringify({ name, password }),
+          data: JSON.stringify({ name, password }), //变成 string 写入数据库
         }).then(
           () => {
             alert("注册成功");

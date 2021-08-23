@@ -85,11 +85,10 @@ var server = http.createServer(function (request, response) {
     }
     response.end();
   } else if (path === "/register" && method === "POST") {
-    response.setHeader("Content-Type", "text/html; charset=utf-8");
-    //读数据库
+    response.setHeader("Content-Type", "text/html; charset=utf-8"); //读数据库
     const userArray = JSON.parse(fs.readFileSync("./db/users.json"));
-    const array = [];
-    //监听请求的上传事件，把chunk数据push到数组里，因为数据可能是一点一点上传，每上传一点，我就往数组里push一点数据
+    const array = []; //声明一个空数组
+    //监听请求的上传事件，把chunk数据push到数组里，因为数据可能是一点一点上传，每上传一点，就往数组里push一点数据
     request.on("data", (chunk) => {
       array.push(chunk);
     });
@@ -97,9 +96,11 @@ var server = http.createServer(function (request, response) {
       //监听请求的结束事件，先把array里的数据变成字符串，这个字符串符合JSON语法,然后在把字符串变成js对象
       const string = Buffer.concat(array).toString();
       const obj = JSON.parse(string);
+      console.log(obj.name); // log 一下，得到就是 name 和 password
+      console.log(obj.password);
       const lastUser = userArray[userArray.length - 1];
       const newUser = {
-        id: lastUser ? lastUser.id + 1 : 1, // id 为最后一个用户的 id + 1
+        id: lastUser ? lastUser.id + 1 : 1, //如果数据库中有用户了，那么 id 就是最后一个用户的 id+1，反之就是 id 为 1
         name: obj.name,
         password: obj.password,
       };
@@ -109,11 +110,9 @@ var server = http.createServer(function (request, response) {
     });
   } else {
     response.statusCode = 200;
-    // 默认首页
-    const filePath = path === "/" ? "/index.html" : path;
+    const filePath = path === "/" ? "/index.html" : path; // 默认首页
     const index = filePath.lastIndexOf(".");
-    // suffix 是后缀
-    const suffix = filePath.substring(index);
+    const suffix = filePath.substring(index); // suffix 是后缀
     const fileTypes = {
       ".html": "text/html",
       ".css": "text/css",
